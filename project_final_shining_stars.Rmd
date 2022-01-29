@@ -1,0 +1,175 @@
+---
+title: "Audience Ratios of the Theater Plays by Stage"
+author: "Shining Stars"
+date: "17 12 2021"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+\begin{center}
+Merve Zengin - Oğuzhan Koç
+\end{center}
+
+
+```{r, include = FALSE, echo = FALSE}
+### Loading required packages
+library(readr)
+library(knitr)
+library(tidyverse)
+library(tm)
+library(wordcloud)
+library(RColorBrewer)
+library(viridis)
+library(ggplot2)
+library(dplyr)
+library(viridis)
+library(lattice)
+library(hrbrthemes)
+
+
+```
+
+```{r, echo = FALSE}
+
+# Importing data
+data <- read.csv("theater_play.csv",encoding="UTF-8")
+view(data)
+new_data <- dplyr::count(data, THEATER_NAME, sort = TRUE)[1:12,]
+view(new_data)
+```
+
+\newpage
+# Project Description
+### Project Goal 
+Visualizing the relationship between the Stage's properties such as location, longitude etc. and the number of audience of the play which is staged.
+
+
+\newpage
+
+## Data Description
+
+  In this data, information showing the type, category, the theater in which they were played, that is, in which district they were played, were recorded in the city theaters of Istanbul Metropolitan Municipality. Using these data, it can be examined whether the welfare levels of some districts in Istanbul are higher in terms of following and accessing cultural activities than others. Within the scope of this project, it can be observed whether there is a relationship between the location of the plays played and the type of games played too.Data on the theater plays played were taken from the Istanbul Metropolitan Municipality Open Data Portal.
+
+## Access to data:
+
+Data is available on the website of Istanbul Büyükşehir Belediyesi Open Data Portal as XML, CSV, JSON and TSV files.
+
+[To access data](https://data.ibb.gov.tr/en/dataset/sehir-tiyatrolari-veri-seti/resource/79465ce9-8755-4b57-8e6c-def0c0caadc8)
+
+## Variables
+
+- Date
+- Name
+- Theater Name
+- Category
+- Is Guest
+- Type
+- Longitude
+- Latitude
+- Number of Audience
+\newpage
+```{r, echo=FALSE}
+#Generating new data table showing how many audiences there are in each theater
+clear_data <- data %>%
+  arrange(desc(THEATER_NAME)) %>% 
+  group_by(THEATER_NAME) %>%
+  summarize(SUM_AUDIENCE = sum(NUMBER_OF_AUDIENCE)) %>% 
+  view()
+
+view(clear_data)
+clear_data
+```
+
+```{r, echo=FALSE}
+#charting the data table we created
+options(scipen=10000)
+ggplot(clear_data[which(clear_data$SUM_AUDIENCE>304),], aes(x=THEATER_NAME, y=SUM_AUDIENCE)) + 
+  geom_bar(stat = "identity", width=0.2, fill="lightskyblue")+
+xlab("Theater Name") + ylab("Total Audience")+
+theme(axis.text.x = element_text(angle = 90, size = 7))
+
+```
+\newpage
+
+\newpage
+```{r,echo=FALSE}
+district <- c("Kağıthane", "Fatih", "Gaziosmanpaşa", "Ümraniye", "Şişli", "Üsküdar", "Kadıköy", "Sultangazi") #districts
+population <- c(442415, 396594, 487778, 713803, 266793, 520771, 481983, 537488) #populations of districts
+sum_audience_by_districts <- c(4038, 3364, 3927, 3260, 3382, 4497, 2528, 1690) #sum of audience by districts
+audience_ratio <- c(sum_audience_by_districts/population) #ratio of audience by districts
+```
+
+```{r, echo=FALSE}
+audience_data <- data.frame(district, population, sum_audience_by_districts, audience_ratio)
+audience_data
+```
+
+
+```{r, echo=FALSE}
+#charting the data table we created
+options(scipen=10000)
+ggplot(audience_data[which(audience_data$audience_ratio>0),], aes(x=district, y=audience_ratio)) + 
+  geom_bar(stat = "identity", width=0.2, fill="salmon2")+
+  xlab("Districts with Theater") + ylab("Audience by Population") +
+theme(axis.text.x = element_text(angle = 90, size = 7))
+
+```
+\newpage
+
+
+\newpage
+```{r,echo=FALSE}
+district <- c("Kağıthane", "Fatih", "Gaziosmanpaşa", "Ümraniye", "Şişli", "Üsküdar", "Kadıköy", "Sultangazi") #districts
+population <- c(442415, 396594, 487778, 713803, 266793, 520771, 481983, 537488) #populations of districts
+undergraduate_or_higher <- c(70086, 59627, 56793, 134935, 72257, 142231, 209465, 38979) #number of undergraduate or higher populations
+education_ratio <- c(undergraduate_or_higher/population) #ratio of undergraduate or higher populations
+```
+
+```{r, echo=FALSE}
+education_data <- data.frame(district, population, undergraduate_or_higher, education_ratio)
+education_data
+```
+
+
+```{r, echo=FALSE}
+#charting the data table we created
+options(scipen=10000)
+ggplot(education_data[which(education_data$education_ratio>0),], aes(x=district, y=education_ratio)) + 
+  geom_bar(stat = "identity", width=0.2, fill="darkolivegreen3")+
+  xlab("Districts with Theater") + ylab("Undergrad or Higher by Population") +
+theme(axis.text.x = element_text(angle = 90, size = 7))
+
+```
+\newpage
+
+\newpage
+
+# Results and Discussion
+
+When we started our project, we wanted to examine the relationship between the viewing rates of theater plays and their location. For this, we evaluated values such as ease of transportation and proximity to the center based on our own information, not on any data. However, as seen in the interim report, we did not find a direct effect of location. Then we drew new graphs using parameters such as the population and education level of the district. Although these are more successful than the location, they are still not sufficient as a single parameter.
+
+Since we could not find any data on the income level, we can only guess from graphs and tables. However, we see that the increasing population rate can affect the viewing rate. There is no direct effect of the education level of the district. The fact that Istanbul is a polycentric district and the population is quite scattered also has an effect on this. Therefore, it becomes very difficult to come to a conclusion with simple parameters. In a more detailed project, new parameters can also be included and an expert can be worked with.
+
+\newpage
+
+\newpage
+
+# Conclusion
+
+In conclusion, when working on such a project, it would be much more useful to use multiple parameters and examine their relationship to each other. While some projects do not require much data, in such projects more data may mean more analysis. Since the project will also include sociological and demographic analysis, getting help from an expert can make the project more successful. Because it is very difficult for two university students to choose the parameters they will use while deciding on the demographic structure of Istanbul.
+
+\newpage
+
+\newpage
+
+# References
+
+- https://data.ibb.gov.tr/dataset/sehir-tiyatrolari-veri-seti/resource/79465ce9-8755-4b57-8e6c-def0c0caadc8
+- http://www.sthda.com/english/wiki/ggplot2-title-main-axis-and-legend-titles
+- https://www.data-to-viz.com/
+- https://www.endeksa.com/tr/analiz/istanbul/demografi
+
+\newpage
+
+
